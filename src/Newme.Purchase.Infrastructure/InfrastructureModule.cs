@@ -4,13 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newme.Purchase.Domain.Repositories;
-using Newme.Purchase.Infrastructure.Messaging;
+using Newme.Purchase.Domain.Messaging;
 using Newme.Purchase.Infrastructure.Persistence;
 using Newme.Purchase.Infrastructure.Persistence.Repositories;
 using Newme.Purchase.Infrastructure.Consulting.Repositories;
 using Newme.Purchase.Infrastructure.Consulting;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using Newme.Purchase.Infrastructure.Messaging;
+using Newme.Purchase.Application.Consulting.Repositories;
+using Newme.Purchase.Infrastructure.Consulting.Mappings;
 
 namespace Newme.Purchase.Infrastructure
 {
@@ -61,6 +64,8 @@ namespace Newme.Purchase.Infrastructure
             services.AddSingleton(sp => {
                 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
                 BsonSerializer.RegisterSerializer(new DateTimeSerializer(BsonType.String));
+
+                MongoMapper.Configure();
 
                 var options = sp.GetService<MongoDbOptions>();
                 var mongoClient = sp.GetService<IMongoClient>();

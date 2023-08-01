@@ -61,11 +61,11 @@ namespace Newme.Purchase.Infrastructure.Persistence.Configurations
             });
 
 
-            builder.Property(x => x.State)
-                .HasColumnName("State")
+            builder.Property(x => x.Status)
+                .HasColumnName("Status")
                 .ValueGeneratedNever()
                 .IsRequired()
-                .HasDefaultValue(EPurchaseOrderState.Initial);
+                .HasDefaultValue(EPurchaseOrderStatus.Initial);
 
 
             builder.HasOne(x => x.Buyer);

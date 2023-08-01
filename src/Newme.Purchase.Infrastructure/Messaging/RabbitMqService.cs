@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Newme.Purchase.Domain.Messaging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 

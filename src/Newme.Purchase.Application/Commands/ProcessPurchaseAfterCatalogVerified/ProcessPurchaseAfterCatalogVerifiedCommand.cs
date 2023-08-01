@@ -9,11 +9,9 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
         public ProcessPurchaseAfterCatalogVerifiedCommand(
             ReducedProductsStockReceivedEvent @event)
         {
-            Id = Guid.NewGuid();
             Event = @event;
         }
 
-        public Guid Id { get; private set; }
         public ReducedProductsStockReceivedEvent Event { get; private set; }
     }
 }

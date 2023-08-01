@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using MongoDB.Driver;
-using Newme.Purchase.Infrastructure.Consulting.ConsultingModels;
+using Newme.Purchase.Application.Consulting.ConsultingModels;
+using Newme.Purchase.Application.Consulting.Repositories;
 
 namespace Newme.Purchase.Infrastructure.Consulting.Repositories
 {
@@ -26,12 +27,12 @@ namespace Newme.Purchase.Infrastructure.Consulting.Repositories
             Guid id, TValueUpdate newValue, Expression<Func<T, TValueUpdate>> expression) 
         {
             var filter = Builders<T>.Filter
-                .Eq(restaurant => restaurant.Id, id);
+                .Eq(x => x.Id, id);
                 
             var update = Builders<T>.Update
                 .Set<TValueUpdate>(expression, newValue);
 
-            await _collection.UpdateOneAsync(filter, update);
+            await _collection.UpdateManyAsync(filter, update);
         }
     }
 }

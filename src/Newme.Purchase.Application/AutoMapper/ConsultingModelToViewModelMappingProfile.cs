@@ -1,5 +1,5 @@
 using AutoMapper;
-using Newme.Purchase.Infrastructure.Consulting.ConsultingModels;
+using Newme.Purchase.Application.Consulting.ConsultingModels;
 using Newmw.Purchase.Application.ViewModels;
 
 namespace Newme.Purchase.Application.AutoMapper

@@ -4,11 +4,10 @@ using Newme.Purchase.Domain.Repositories;
 using AutoMapper;
 using Newme.Purchase.Domain.Models.Discounts.Interfaces;
 using FluentValidation.Results;
-using Newme.Purchase.Infrastructure.Messaging;
+using Newme.Purchase.Domain.Messaging;
 using Microsoft.Extensions.Logging;
 using Newme.Purchase.Application.Events.ProcessedPurchase;
 using Newme.Purchase.Application.Subscribers.PaymentResolvedPurchaseOrder.Sent;
-using Newme.Purchase.Domain.Models.Enums;
 using Newme.Purchase.Domain.Extensions;
 
 namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerified
@@ -48,6 +47,12 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
                 return command.ValidationResult;
             }
 
+            if (command.Event.Success == false)
+            {
+                AddError($"Error in catalog verified step for purchase id {command.Event.PurchaseId}.");
+                return command.ValidationResult;
+            }
+
             var purchaseOrder = await _commandRepository.FindByAsync<PurchaseOrder>(x => x.Id == command.Event.PurchaseId);
             var purchaseItems = await _commandRepository.GetByAsync<PurchaseItem>(x => x.PurchaseOrderId == command.Event.PurchaseId);
 
@@ -63,115 +68,40 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
                 return ValidationResult;
             }
 
-            var vouncherValue = 0.0;
             await Parallel.ForEachAsync(
-                source: purchaseItems, 
-                cancellationToken: cancellationToken, 
-                body: async (purchaseItem, stoppingToken) => await ResolvePurchaseItemState(
-                    purchaseItem, purchaseOrder, command, vouncherValue)).ConfigureAwait(true);
+                source: purchaseItems,
+                cancellationToken: cancellationToken,
+                body: async (purchaseItem, stoppingToken) => await ResolvePurchaseItemStatus(
+                    purchaseItem, command)).ConfigureAwait(false);
+
+            // Resolver status da compra
+            purchaseOrder.ResolveStatus();
+            await _commandRepository.UpdateStatusAsync(purchaseOrder);
+
+            await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
+
+            var totalRefund = purchaseOrder.GetTotalRefund();
+            if (totalRefund > 0)
+            {
+                SendExternalEventToMessageBus(purchaseOrder, totalRefund);
+            }
 
             _logger.LogInformation($"{nameof(ProcessPurchaseAfterCatalogVerifiedCommandHandler)} successfully completed");
 
             return ValidationResult;
         }
 
-
-        private async Task<ValidationResult> ResolvePurchaseItemState(
+        private async Task<ValidationResult> ResolvePurchaseItemStatus(
             PurchaseItem purchaseItem, 
-            PurchaseOrder purchaseOrder, 
-            ProcessPurchaseAfterCatalogVerifiedCommand command,
-            double totalVouncher)
+            ProcessPurchaseAfterCatalogVerifiedCommand command)
         {
             var commandItem = command.Event.Items.FirstOrDefault(x => x.ProductId == purchaseItem.ProductId);
+            var quantityAchieved = commandItem!.QuantityAchieved;
             
-            if (commandItem!.IsEmptyStock)
-            {
-                return await ResolveIsEmptyStock(purchaseOrder, purchaseItem);
-            }
+            purchaseItem.ApplyRefund(quantityAchieved);
+            purchaseItem.UpdateStatus(quantityAchieved);
 
-            var vouncherItem = purchaseItem.CalculateVouncher(commandItem!.QuantityAchieved);
-            totalVouncher += vouncherItem;
-
-            if (vouncherItem > 0)
-            {
-                return await ResolveIsNotEmptyStockButHasVouncherValue(purchaseOrder, vouncherItem);
-            }
-            
-            return await ResolveAllItemsAccepted(purchaseOrder);
-        }
-
-        private async Task<ValidationResult> ResolveIsEmptyStock(
-            PurchaseOrder purchaseOrder,
-            PurchaseItem purchaseItem)
-        {
-            var isCommitSuccess = await _commandRepository.UpdateStateAsync(purchaseOrder.Id, EPurchaseOrderState.OutOfStock);
-
-            if (isCommitSuccess)
-            {
-                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
-
-                var sentEvent = new PurchaseRefundAsExchangeVoucherSentEvent(
-                    buyerId: purchaseOrder.Buyer.Id,
-                    purchaseId: purchaseOrder.Id,
-                    buyerName: purchaseOrder.Buyer.Name,
-                    buyerEmail: purchaseOrder.Buyer.Email,
-                    totalPrice: purchaseItem.CalculateRefund(),
-                    freightValue: purchaseOrder.FreightValue
-                );
-                _logger.LogInformation("Message purchase order reject by item out of stock, event is sending with purchase id: {purchaseId}.\npurchase order state is: {state}.",
-                    purchaseOrder.Id, 
-                    EPurchaseOrderState.OutOfStock.GetEnumDescription());
-
-                _messageBus.Publish(sentEvent, "purchase-refund-as-exchange-voucher");
-                // Enviar email de que a compra foi rejeitada por falta de estoque, nesse caso o frete tbm é reembolsado pq n terá envio algum.
-            }
-
-            return ValidationResult;
-        }
-
-        private async Task<ValidationResult> ResolveIsNotEmptyStockButHasVouncherValue(
-            PurchaseOrder purchaseOrder, 
-            double vouncherValue)
-        {
-            var isCommitSuccess = await _commandRepository.UpdateStateAsync(purchaseOrder.Id, EPurchaseOrderState.PartiallyApproved);
-
-            if (isCommitSuccess)
-            {
-                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
-                
-                var sentEvent = new PurchaseRefundAsExchangeVoucherSentEvent(
-                    buyerId: purchaseOrder.BuyerId,
-                    purchaseId: purchaseOrder.Id,
-                    buyerName: purchaseOrder.Buyer.Name,
-                    buyerEmail: purchaseOrder.Buyer.Email,
-                    totalPrice: vouncherValue
-                );
-                _logger.LogInformation("Message some itens in purchase order is rejected by item out of stock, event is sending with purchase id: {purchaseId}.\npurchase order state is: {state}.",
-                    purchaseOrder.Id, 
-                    EPurchaseOrderState.PartiallyApproved.GetEnumDescription());
-
-                _messageBus.Publish(sentEvent, "purchase-refund-as-exchange-voucher");
-                // Enviar email de que foi aprovado com alguns itens rejeitados por falta de estoque e que tera vale compra no valor dos itens que foram rejeitados or falta de estoque.
-            }
-
-            return ValidationResult;
-        }
-
-        private async Task<ValidationResult> ResolveAllItemsAccepted(
-            PurchaseOrder purchaseOrder)
-        {
-            var isCommitSuccess = await _commandRepository.UpdateStateAsync(purchaseOrder.Id, EPurchaseOrderState.Approved);
-
-            if (isCommitSuccess)
-            {
-                _logger.LogInformation("Message all itens in purchase order is accepted, event is sending with purchase id: {purchaseId}.\npurchase order state is: {state}.",
-                    purchaseOrder.Id, 
-                    EPurchaseOrderState.Approved.GetEnumDescription());
-
-                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
-                // Enviar email de que foi aprovada.
-            }
-
+            await _commandRepository.UpdateItemStatusAsync(purchaseItem);
             return ValidationResult;
         }
 
@@ -182,6 +112,19 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
                 detail: "processed purchase after catalog verified.");
 
             await _mediator.Publish(processedPurchaseOrderEvent).ConfigureAwait(false);
+        }
+
+        private void SendExternalEventToMessageBus(PurchaseOrder purchaseOrder, double totalRefund)
+        {
+            var sentEvent = new PurchaseRefundAsExchangeVoucherSentEvent(
+                buyerId: purchaseOrder.Buyer.Id,
+                purchaseId: purchaseOrder.Id,
+                totalPrice: purchaseOrder.GetTotalRefund()
+            );
+            _logger.LogInformation("Message purchase order item is rejected by item out of stock, event is sending with purchase id: {purchaseId}.\npurchase order item status is: {state}.",
+                purchaseOrder.Id, purchaseOrder.Status.GetEnumDescription());
+
+            _messageBus.Publish(sentEvent, "purchase-refund-as-exchange-voucher");
         }
     }
 }

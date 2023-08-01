@@ -11,7 +11,7 @@ namespace Newme.Purchase.Domain.Models.Entities
         public Guid BuyerId { get; private set; }
 
         public DateTime Date { get; private set; }
-        public IList<PurchaseItem> PurchaseItems { get; set; }
+        public IList<PurchaseItem> PurchaseItems { get; private set; }
         public double Price { get; private set; }
         public bool HasSummary { get; private set; }
 
@@ -22,7 +22,7 @@ namespace Newme.Purchase.Domain.Models.Entities
 
         public double FreightValue { get; private set; }
         public Address Address { get; private set; }
-        public EPurchaseOrderState State { get; internal set; }        //ignore
+        public EPurchaseOrderStatus Status { get; private set; }
 
         private PurchaseOrder() { }
         public PurchaseOrder(
@@ -44,7 +44,7 @@ namespace Newme.Purchase.Domain.Models.Entities
             Price = price;
             FreightValue = freightValue;
             PurchaseItems = purchaseItems;
-            State = EPurchaseOrderState.Initial;
+            Status = EPurchaseOrderStatus.Initial;
         }
 
         private void UpdatePrice(double value)
@@ -81,9 +81,42 @@ namespace Newme.Purchase.Domain.Models.Entities
             AddFreight();
         }
 
-        public void UpdateState(EPurchaseOrderState state)
+        public void UpdateStatus(EPurchaseOrderStatus status)
         {
-            State = state;
+            Status = status;
+        }
+
+        public double GetTotalRefund()
+        {
+            var itemsToRefund = PurchaseItems
+                .Where(x => x.Status == EPurchaseOrderItemStatus.OutOfStock);
+
+            var totalItemsToRefund = itemsToRefund.Sum(x => x.Refund);
+
+            if (itemsToRefund.Count() == PurchaseItems.Count())
+            {
+                totalItemsToRefund += FreightValue;
+            }
+            return totalItemsToRefund;
+        }
+
+        public void ResolveStatus()
+        {
+            var itemsOutOfRangeCount = PurchaseItems.Where(
+                x => x.Status == EPurchaseOrderItemStatus.OutOfStock).Count();
+
+            var purchaseItemsCount = PurchaseItems.Count;
+            if (itemsOutOfRangeCount == purchaseItemsCount)
+            {
+                Status = EPurchaseOrderStatus.OutOfStock;
+                return;
+            }
+            if (itemsOutOfRangeCount > 0)
+            {
+                Status = EPurchaseOrderStatus.PartiallyApproved;
+                return;
+            }
+            Status = EPurchaseOrderStatus.Approved;
         }
     }
 }

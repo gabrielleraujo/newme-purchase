@@ -9,11 +9,9 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
         public ProcessPurchaseAfterPaymentVerifiedCommand(
             PaymentResolvedPurchaseOrderReceivedEvent @event)
         {
-            Id = Guid.NewGuid();
             Event = @event;
         }
 
-        public Guid Id { get; private set; }
         public PaymentResolvedPurchaseOrderReceivedEvent Event { get; private set; }
     }
 }

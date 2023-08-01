@@ -6,7 +6,7 @@ using Newme.Purchase.Domain.Models.ValueObjects;
 using Newme.Purchase.Domain.Models.Discounts.Interfaces;
 using FluentValidation.Results;
 using Newme.Purchase.Application.Events;
-using Newme.Purchase.Infrastructure.Messaging;
+using Newme.Purchase.Domain.Messaging;
 using Microsoft.Extensions.Logging;
 using Newme.Purchase.Domain.Models.Enums;
 using Newme.Purchase.Application.Subscribers.ReducedProductItemStockReceived.Sent;
@@ -63,7 +63,7 @@ namespace Newme.Purchase.Application.Commands.CreatePurchase
 
             purchaseOrder.ApplyDiscont(_chainOfDiscounts);
             purchaseOrder.AddFreight();
-            purchaseOrder.UpdateState(EPurchaseOrderState.PaymentValidation);
+            purchaseOrder.UpdateStatus(EPurchaseOrderStatus.PaymentValidation);
 
             await RegisterPurchase(command, purchaseOrder);
 

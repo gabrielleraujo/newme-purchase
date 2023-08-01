@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newme.Purchase.Domain.Models.Entities;
+using Newme.Purchase.Domain.Models.Enums;
 
 namespace Newme.Purchase.Infrastructure.Persistence.Configurations
 {
@@ -27,6 +28,12 @@ namespace Newme.Purchase.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.Quantity)
                 .HasColumnName("Quantity");
+
+            builder.Property(x => x.Status)
+                .HasColumnName("Status")
+                .ValueGeneratedNever()
+                .IsRequired()
+                .HasDefaultValue(EPurchaseOrderItemStatus.Initial);
         }
     }
 }

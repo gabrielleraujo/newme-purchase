@@ -12,7 +12,7 @@ using Newme.Purchase.Infrastructure.Persistence;
 namespace Newme.Purchase.Infrastructure.Migrations
 {
     [DbContext(typeof(PurchaseCommandContext))]
-    [Migration("20230709212455_initial")]
+    [Migration("20230722165717_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -114,6 +114,14 @@ namespace Newme.Purchase.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Quantity");
 
+                    b.Property<double>("Refund")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("Status");
+
                     b.Property<double>("UnitPrice")
                         .HasColumnType("float")
                         .HasColumnName("UnitPrice");
@@ -163,10 +171,10 @@ namespace Newme.Purchase.Infrastructure.Migrations
                     b.Property<double>("PurchseDiscountValue")
                         .HasColumnType("float");
 
-                    b.Property<int>("State")
+                    b.Property<int>("Status")
                         .HasColumnType("int")
                         .HasDefaultValue(0)
-                        .HasColumnName("State");
+                        .HasColumnName("Status");
 
                     b.HasKey("Id");
 
@@ -175,7 +183,7 @@ namespace Newme.Purchase.Infrastructure.Migrations
                     b.ToTable("PurchaseOrder", (string)null);
                 });
 
-            modelBuilder.Entity("Newme.Purchase.Infrastructure.Configurations.Utils.PurchaseOrderState", b =>
+            modelBuilder.Entity("Newme.Purchase.Infrastructure.Configurations.Utils.PurchaseOrderItemStatus", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier")
@@ -186,58 +194,110 @@ namespace Newme.Purchase.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Description");
 
-                    b.Property<int>("State")
+                    b.Property<int>("Status")
                         .HasColumnType("int")
-                        .HasColumnName("State");
+                        .HasColumnName("Status");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("State");
+                    b.HasIndex("Status");
 
-                    b.ToTable("PurchaseOrderState", (string)null);
+                    b.ToTable("PurchaseOrderItemStatus", (string)null);
+
+                    b.UseTpcMappingStrategy();
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("21bb4140-62e7-4471-acb0-9d16914a7ae3"),
+                            Id = new Guid("9566dea4-7c7e-41b1-97e4-1c7bef79adf8"),
+                            Description = "item de compra criado",
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = new Guid("1263d8ed-c935-443c-98b6-47c9a1a795b1"),
+                            Description = "item de compra não aprovado porque o produto estava fora de estoque",
+                            Status = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("e965659f-bd46-4483-b4a3-3647c2654246"),
+                            Description = "item de compra parcialmente aprovado",
+                            Status = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("459ee5f1-f1f9-4820-be9c-5628e7a201c7"),
+                            Description = "item de compra aprovado",
+                            Status = 1
+                        });
+                });
+
+            modelBuilder.Entity("Newme.Purchase.Infrastructure.Configurations.Utils.PurchaseOrderStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Description");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("Status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("PurchaseOrderStatus", (string)null);
+
+                    b.UseTpcMappingStrategy();
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("b7f9f558-8556-4b85-a516-6a92db138def"),
                             Description = "inicial",
-                            State = 0
+                            Status = 0
                         },
                         new
                         {
-                            Id = new Guid("911c3da3-707c-4572-a603-0213fcea3944"),
+                            Id = new Guid("b5a17818-693d-4b6a-af68-e525e88a3d23"),
                             Description = "validação do pagamento",
-                            State = 1
+                            Status = 1
                         },
                         new
                         {
-                            Id = new Guid("a919b49f-c760-46e2-9655-587d999e87c5"),
+                            Id = new Guid("6e09a39b-3d6a-43d2-af97-196fc03fda77"),
                             Description = "pagamento autorizado",
-                            State = 2
+                            Status = 2
                         },
                         new
                         {
-                            Id = new Guid("5350a9b1-d7da-4609-b14b-3b7dcdf5e4dd"),
+                            Id = new Guid("a175401c-16e8-4bd2-a47e-5aa42282fad0"),
                             Description = "pagamento não autorizado",
-                            State = 3
+                            Status = 3
                         },
                         new
                         {
-                            Id = new Guid("f137d268-b9f6-4d2e-9a25-7db78a2c86c0"),
+                            Id = new Guid("cae60eb5-4217-4a8f-b200-f89ebd4e951f"),
                             Description = "compra não aprovada porque o produto estava fora de estoque",
-                            State = 4
+                            Status = 4
                         },
                         new
                         {
-                            Id = new Guid("25b66b8b-70c0-468e-9c08-3af7417b1c31"),
+                            Id = new Guid("ce5d3651-7b88-4ee0-8fbb-1b02f840a27b"),
                             Description = "compra aprovada com itens faltantes",
-                            State = 5
+                            Status = 5
                         },
                         new
                         {
-                            Id = new Guid("cfbdac27-0ea4-4ffe-92b5-7115efc7052a"),
+                            Id = new Guid("5d7b0f59-a59f-4766-926d-34786d4c0f5c"),
                             Description = "compra aprovada",
-                            State = 6
+                            Status = 6
                         });
                 });
 

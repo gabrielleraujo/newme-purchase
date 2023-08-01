@@ -1,6 +1,6 @@
 using AutoMapper;
 using MediatR;
-using Newme.Purchase.Infrastructure.Consulting.Repositories;
+using Newme.Purchase.Application.Consulting.Repositories;
 using Newmw.Purchase.Application.ViewModels;
 
 namespace Newme.Purchase.Application.Queries.GetAllBuyersPurchases

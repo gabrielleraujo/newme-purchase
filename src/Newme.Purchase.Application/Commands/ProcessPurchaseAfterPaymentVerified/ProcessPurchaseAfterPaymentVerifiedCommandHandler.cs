@@ -4,7 +4,7 @@ using Newme.Purchase.Domain.Repositories;
 using AutoMapper;
 using Newme.Purchase.Domain.Models.Discounts.Interfaces;
 using FluentValidation.Results;
-using Newme.Purchase.Infrastructure.Messaging;
+using Newme.Purchase.Domain.Messaging;
 using Microsoft.Extensions.Logging;
 using Newme.Purchase.Application.Events.ProcessedPurchase;
 using Newme.Purchase.Domain.Models.Enums;
@@ -57,43 +57,34 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
             
             if (command.Event.IsPaymentAuthorized)
             {
-                await RunPurchaseApproved(purchaseOrder).ConfigureAwait(false);
+                purchaseOrder.UpdateStatus(EPurchaseOrderStatus.PaymentAuthorized);
+                await _commandRepository.UpdateStatusAsync(purchaseOrder);
+                
+                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
+                SendExternalEventToMessageBus(purchaseOrder);
             }
             else
             {
-                await RunPurchaseRejected(purchaseOrder).ConfigureAwait(false);
+                purchaseOrder.UpdateStatus(EPurchaseOrderStatus.PaymentUnauthorized);
+                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
             }
+
+            await _commandRepository.UpdateStatusAsync(purchaseOrder);
 
             _logger.LogInformation($"{nameof(ProcessPurchaseAfterPaymentVerifiedCommandHandler)} successfully completed");
 
             return ValidationResult;
         }
-
-        private async Task RunPurchaseRejected(PurchaseOrder purchaseOrder)
-        {
-            var isCommitSuccess = await _commandRepository.UpdateStateAsync(
-                purchaseOrder.Id,
-                EPurchaseOrderState.PaymentUnauthorized);
-
-            if (isCommitSuccess)
-            {
-                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
-            }
-        }
-
-        private async Task RunPurchaseApproved(PurchaseOrder purchaseOrder)
-        {
-            var isCommitSuccess = await _commandRepository.UpdateStateAsync(
-                purchaseOrder.Id,
-                EPurchaseOrderState.PaymentAuthorized);
-
-            if (isCommitSuccess)
-            {
-                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
-                SendExternalEventToMessageBus(purchaseOrder);
-            }
-        }
         
+        private async Task SendDomainEvent(PurchaseOrder purchaseOrder)
+        {
+            var processedPurchaseOrderEvent = new ProcessedPurchaseEvent(
+                purchaseOrder: purchaseOrder,
+                detail: "processed purchase after payment verified.");
+
+            await _mediator.Publish(processedPurchaseOrderEvent).ConfigureAwait(false);
+        }
+
         private void SendExternalEventToMessageBus(PurchaseOrder purchaseOrder)
         {
             var setEvent = new CreatedPurchaseOrderSentEvent(
@@ -105,15 +96,6 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
             );
 
             _messageBus.Publish(setEvent, CreatedPurchaseOrderItemSentEvent.Name);
-        }
-
-        private async Task SendDomainEvent(PurchaseOrder purchaseOrder)
-        {
-            var processedPurchaseOrderEvent = new ProcessedPurchaseEvent(
-                purchaseOrder: purchaseOrder,
-                detail: "processed purchase after payment verified.");
-
-            await _mediator.Publish(processedPurchaseOrderEvent).ConfigureAwait(false);
         }
     }
 }

@@ -13,7 +13,8 @@ namespace Newme.Purchase.Infrastructure.Persistence
         public DbSet<PurchaseOrder> Purchases { get; set; }
         public DbSet<PurchaseItem> PurchaseItems { get; set; }
         public DbSet<Buyer> Buyers { get; set; }
-        public DbSet<PurchaseOrderState> PurchaseOrderStates { get; set; }
+        public DbSet<PurchaseOrderStatus> PurchaseOrderStatus { get; set; }
+        public DbSet<PurchaseOrderItemStatus> PurchaseOrderItemStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,7 +22,8 @@ namespace Newme.Purchase.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new PurchaseOrderConfiguration());
             modelBuilder.ApplyConfiguration(new PurchaseItemConfiguration());
             modelBuilder.ApplyConfiguration(new BuyerConfiguration());
-            modelBuilder.ApplyConfiguration(new PurchaseOrderStateConfiguration());
+            modelBuilder.ApplyConfiguration(new PurchaseOrderStatusConfiguration());
+            modelBuilder.ApplyConfiguration(new PurchaseOrderItemStatusConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

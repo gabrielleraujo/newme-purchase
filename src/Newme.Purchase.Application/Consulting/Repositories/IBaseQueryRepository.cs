@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using Newme.Purchase.Infrastructure.Consulting.ConsultingModels;
+using Newme.Purchase.Application.Consulting.ConsultingModels;
 
-namespace Newme.Purchase.Infrastructure.Consulting.Repositories
+namespace Newme.Purchase.Application.Consulting.Repositories
 {
     public interface IBaseQueryRepository<T> where T : ConsultingModel
     {

@@ -2,7 +2,7 @@
 
 namespace Newme.Purchase.Domain.Models.Enums
 {
-    public enum EPurchaseOrderState
+    public enum EPurchaseOrderStatus
     {
         [Description("inicial")]
         Initial = 0,

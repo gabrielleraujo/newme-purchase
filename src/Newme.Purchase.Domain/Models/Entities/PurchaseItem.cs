@@ -1,4 +1,5 @@
 ﻿using Newme.Purchase.Domain.Models.Abstracts;
+using Newme.Purchase.Domain.Models.Enums;
 
 namespace Newme.Purchase.Domain.Models.Entities
 {
@@ -16,21 +17,34 @@ namespace Newme.Purchase.Domain.Models.Entities
             ProductId = productId;
             UnitPrice = unitPrice;
             Quantity = quantity;
+            Status = EPurchaseOrderItemStatus.Approved;
         }
 
         public Guid PurchaseOrderId { get; set; }
         public Guid ProductId { get; private set; }
         public double UnitPrice { get; private set; }
         public int Quantity { get; private set; }
+        public EPurchaseOrderItemStatus Status { get; internal set; }
+        public double Refund { get; internal set; }
 
-        public double CalculateVouncher(int quantityAchieved)
+        public void ApplyRefund(int quantityAchieved)
         {
-            return UnitPrice * (Quantity - quantityAchieved);
+            Refund = UnitPrice * (Quantity - quantityAchieved);
         }
 
-        public double CalculateRefund()
+        public void UpdateStatus(int quantityAchieved)
         {
-            return UnitPrice * Quantity;
+            if (quantityAchieved == 0)
+            {
+                Status = EPurchaseOrderItemStatus.OutOfStock;
+                return;
+            }
+            if (quantityAchieved < Quantity && quantityAchieved > 0)
+            {
+                Status = EPurchaseOrderItemStatus.PartiallyApproved;
+                return;
+            }
+            Status = EPurchaseOrderItemStatus.Approved;
         }
     }
 }

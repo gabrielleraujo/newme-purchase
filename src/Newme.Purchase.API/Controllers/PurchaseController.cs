@@ -38,7 +38,7 @@ namespace Newme.Purchase.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{purchaseId:int}")]
+        [HttpGet("{purchaseId:Guid}")]
         public async Task<IActionResult> GetById(Guid purchaseId)
         {
             var result = await _purchaseApplicationService.GetById(purchaseId);

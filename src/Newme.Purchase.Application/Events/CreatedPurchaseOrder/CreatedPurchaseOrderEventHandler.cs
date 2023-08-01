@@ -1,9 +1,8 @@
-using System.Net.Mime;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Newme.Purchase.Infrastructure.Consulting.ConsultingModels;
-using Newme.Purchase.Infrastructure.Consulting.Repositories;
+using Newme.Purchase.Application.Consulting.ConsultingModels;
+using Newme.Purchase.Application.Consulting.Repositories;
 
 namespace Newme.Purchase.Application.Events
 {

@@ -22,17 +22,6 @@ namespace Newme.Purchase.Infrastructure.Persistence.Repositories
             await _context.Products.AddRangeAsync(products);
         }
 
-        public async Task<bool> UpdateStateAsync(Guid id, EPurchaseOrderState newState)
-        {
-            var dbSet = _context.Purchases;
-            var affectedRows = await dbSet
-                .Where(x => x.Id == id)
-                .ExecuteUpdateAsync(x =>
-                    x.SetProperty(x => x.State, x => newState)
-                );
-            return affectedRows > 0;
-        }
-
         public async Task<PurchaseOrder> FindIncludingByAsync(Func<PurchaseOrder, bool> predicate)
         {
             var response = _context.Purchases
@@ -41,6 +30,35 @@ namespace Newme.Purchase.Infrastructure.Persistence.Repositories
                 .FirstOrDefault();
             
             return await Task.FromResult(response);
+        }
+
+        public async Task UpdateStatusAsync(PurchaseOrder purchase)
+        {
+            var dbSet = _context.Purchases;
+            var affectedRows = await dbSet
+                .Where(x => x.Id == purchase.Id)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(x => x.Status, x => purchase.Status)
+                );
+
+            VerifyUpdateStatus(affectedRows);
+        }
+
+        public async Task UpdateItemStatusAsync(PurchaseItem purchaseItem)
+        {
+            var dbSet = _context.PurchaseItems;
+            var affectedRows = await dbSet
+                .Where(x => x.Id == purchaseItem.Id)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(x => x.Status, x => purchaseItem.Status)
+                );
+            VerifyUpdateStatus(affectedRows);
+        }
+
+        private static void VerifyUpdateStatus(int affectedRows)
+        {
+            if (affectedRows == 0) 
+                throw new DbUpdateException("Error updating purchase status");
         }
     }
 }

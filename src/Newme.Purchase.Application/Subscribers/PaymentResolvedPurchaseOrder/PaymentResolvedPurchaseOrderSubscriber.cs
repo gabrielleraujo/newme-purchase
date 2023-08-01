@@ -6,7 +6,7 @@ using RabbitMQ.Client.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Newme.Purchase.Application.Subscribers.PaymentResolvedPurchaseOrder.Received;
 using Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerified;
-using Newme.Purchase.Infrastructure.Messaging;
+using Newme.Purchase.Domain.Messaging;
 using MediatR;
 
 namespace Newme.Purchase.Application.Subscribers.PaymentResolvedPurchaseOrder

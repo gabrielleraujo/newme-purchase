@@ -3,7 +3,7 @@ using MediatR;
 using Newme.Purchase.Domain.Models.Discounts.Interfaces;
 using Newme.Purchase.Domain.Models.Entities;
 using Newme.Purchase.Domain.Models.ValueObjects;
-using Newme.Purchase.Infrastructure.Consulting.Repositories;
+using Newme.Purchase.Application.Consulting.Repositories;
 
 namespace Newme.Purchase.Application.Queries.CalculateDiscount
 {

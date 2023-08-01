@@ -1,8 +1,8 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Newme.Purchase.Infrastructure.Consulting.ConsultingModels;
-using Newme.Purchase.Infrastructure.Consulting.Repositories;
+using Newme.Purchase.Application.Consulting.ConsultingModels;
+using Newme.Purchase.Application.Consulting.Repositories;
 using Newme.Purchase.Domain.Extensions;
 
 namespace Newme.Purchase.Application.Events.ProcessedPurchase
@@ -34,7 +34,9 @@ namespace Newme.Purchase.Application.Events.ProcessedPurchase
                 notification.Id, DateTime.Now, consultingModel.ToString());
 
             await _purchaseQueryRepository.UpdateAsync(
-                notification.PurchaseOrder.Id, notification.PurchaseOrder.State.GetEnumDescription(), x => x.State);
+                notification.PurchaseOrder.Id, notification.PurchaseOrder.Status.GetEnumDescription(), x => x.Status);
+
+            await _purchaseQueryRepository.UpdateItemsAsync(consultingModel.PurchaseItems);
 
             _logger.LogInformation("Event id: {id} sending email for buyer id: {buyerId} at: {date}.", 
                 notification.Id, notification.PurchaseOrder.BuyerId, DateTime.Now);

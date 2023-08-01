@@ -46,16 +46,29 @@ namespace Newme.Purchase.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PurchaseOrderState",
+                name: "PurchaseOrderItemStatus",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    State = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PurchaseOrderState", x => x.Id);
+                    table.PrimaryKey("PK_PurchaseOrderItemStatus", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PurchaseOrderStatus",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchaseOrderStatus", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,7 +91,7 @@ namespace Newme.Purchase.Infrastructure.Migrations
                     Neighborhood = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UF = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    State = table.Column<int>(type: "int", nullable: false, defaultValue: 0)
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -99,7 +112,9 @@ namespace Newme.Purchase.Infrastructure.Migrations
                     PurchaseOrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UnitPrice = table.Column<double>(type: "float", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    Refund = table.Column<double>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -119,17 +134,28 @@ namespace Newme.Purchase.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "PurchaseOrderState",
-                columns: new[] { "Id", "Description", "State" },
+                table: "PurchaseOrderItemStatus",
+                columns: new[] { "Id", "Description", "Status" },
                 values: new object[,]
                 {
-                    { new Guid("21bb4140-62e7-4471-acb0-9d16914a7ae3"), "inicial", 0 },
-                    { new Guid("25b66b8b-70c0-468e-9c08-3af7417b1c31"), "compra aprovada com itens faltantes", 5 },
-                    { new Guid("5350a9b1-d7da-4609-b14b-3b7dcdf5e4dd"), "pagamento não autorizado", 3 },
-                    { new Guid("911c3da3-707c-4572-a603-0213fcea3944"), "validação do pagamento", 1 },
-                    { new Guid("a919b49f-c760-46e2-9655-587d999e87c5"), "pagamento autorizado", 2 },
-                    { new Guid("cfbdac27-0ea4-4ffe-92b5-7115efc7052a"), "compra aprovada", 6 },
-                    { new Guid("f137d268-b9f6-4d2e-9a25-7db78a2c86c0"), "compra não aprovada porque o produto estava fora de estoque", 4 }
+                    { new Guid("1263d8ed-c935-443c-98b6-47c9a1a795b1"), "item de compra não aprovado porque o produto estava fora de estoque", 2 },
+                    { new Guid("459ee5f1-f1f9-4820-be9c-5628e7a201c7"), "item de compra aprovado", 1 },
+                    { new Guid("9566dea4-7c7e-41b1-97e4-1c7bef79adf8"), "item de compra criado", 0 },
+                    { new Guid("e965659f-bd46-4483-b4a3-3647c2654246"), "item de compra parcialmente aprovado", 3 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "PurchaseOrderStatus",
+                columns: new[] { "Id", "Description", "Status" },
+                values: new object[,]
+                {
+                    { new Guid("5d7b0f59-a59f-4766-926d-34786d4c0f5c"), "compra aprovada", 6 },
+                    { new Guid("6e09a39b-3d6a-43d2-af97-196fc03fda77"), "pagamento autorizado", 2 },
+                    { new Guid("a175401c-16e8-4bd2-a47e-5aa42282fad0"), "pagamento não autorizado", 3 },
+                    { new Guid("b5a17818-693d-4b6a-af68-e525e88a3d23"), "validação do pagamento", 1 },
+                    { new Guid("b7f9f558-8556-4b85-a516-6a92db138def"), "inicial", 0 },
+                    { new Guid("cae60eb5-4217-4a8f-b200-f89ebd4e951f"), "compra não aprovada porque o produto estava fora de estoque", 4 },
+                    { new Guid("ce5d3651-7b88-4ee0-8fbb-1b02f840a27b"), "compra aprovada com itens faltantes", 5 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -148,9 +174,14 @@ namespace Newme.Purchase.Infrastructure.Migrations
                 column: "PurchaseOrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PurchaseOrderState_State",
-                table: "PurchaseOrderState",
-                column: "State");
+                name: "IX_PurchaseOrderItemStatus_Status",
+                table: "PurchaseOrderItemStatus",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PurchaseOrderStatus_Status",
+                table: "PurchaseOrderStatus",
+                column: "Status");
         }
 
         /// <inheritdoc />
@@ -160,7 +191,10 @@ namespace Newme.Purchase.Infrastructure.Migrations
                 name: "PurchaseOrderItem");
 
             migrationBuilder.DropTable(
-                name: "PurchaseOrderState");
+                name: "PurchaseOrderItemStatus");
+
+            migrationBuilder.DropTable(
+                name: "PurchaseOrderStatus");
 
             migrationBuilder.DropTable(
                 name: "Products");

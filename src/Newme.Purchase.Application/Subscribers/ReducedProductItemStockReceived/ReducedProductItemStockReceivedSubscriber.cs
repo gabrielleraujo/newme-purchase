@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Newme.Purchase.Application.Subscribers.ReducedProductItemStockReceived.Received;
-using Newme.Purchase.Infrastructure.Messaging;
+using Newme.Purchase.Domain.Messaging;
 using MediatR;
 using Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerified;
 

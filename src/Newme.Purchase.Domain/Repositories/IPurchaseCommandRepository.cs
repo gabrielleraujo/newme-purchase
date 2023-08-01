@@ -1,5 +1,4 @@
 using Newme.Purchase.Domain.Models.Entities;
-using Newme.Purchase.Domain.Models.Enums;
 
 namespace Newme.Purchase.Domain.Repositories
 {
@@ -7,7 +6,12 @@ namespace Newme.Purchase.Domain.Repositories
     {
         Task AddBuyerAsync(Buyer buyer);
         Task AddRangeProductsAsync(IEnumerable<Product> products);
-        Task<bool> UpdateStateAsync(Guid id, EPurchaseOrderState newState);
+
+        Task UpdateStatusAsync(PurchaseOrder purchase);
+        Task UpdateItemStatusAsync(PurchaseItem purchaseItem);
+
+        // Task<bool> UpdateStatusAsync(Guid id, EPurchaseOrderStatus newState);
+        // Task<bool> UpdateItemStatusAsync(Guid id, EPurchaseOrderItemStatus newState);
         Task<PurchaseOrder> FindIncludingByAsync(Func<PurchaseOrder, bool> predicate);
     }
 }
