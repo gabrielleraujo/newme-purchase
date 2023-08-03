@@ -41,10 +41,11 @@ namespace Newme.Purchase.Infrastructure.Persistence.Repositories
             return _context.Set<TModel>().Where(predicate).ToList();
         }
 
-        public IEnumerable<TEntity> GetItemsNotFound<TEntity>(IEnumerable<TEntity> items) where TEntity : Entity
+        public async Task<IEnumerable<TEntity>> GetItemsNotFound<TEntity>(IEnumerable<TEntity> items) where TEntity : Entity
         {
-            var exists = _context.Set<T>().Where(x => items.Select(x => x.Id).Contains(x.Id)).ToList();
-            return items.Where(x => !exists.Select(x => x.Id).Contains(x.Id));
+            var exists = await _context.Set<TEntity>().Where(x => items.Select(item => item.Id).Contains(x.Id)).ToListAsync();
+            var response = items.Where(item => !exists.Select(x => x.Id).Contains(item.Id));
+            return response;
         }
 
         public IEnumerable<Guid> GetIdsNotFound(IEnumerable<Guid> ids)

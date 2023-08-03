@@ -12,8 +12,8 @@ namespace Newme.Purchase.Infrastructure.Persistence.Configurations
             builder.ToTable("PurchaseOrderStatus");
 
             builder
-                .ConfigureStatus<PurchaseOrderStatus, EPurchaseOrderStatus>()
-                .HasData(PurchaseOrderStatus.Data);
+                .ConfigureStatus<PurchaseOrderStatus, EPurchaseOrderStatus>();
+                //.HasData(PurchaseOrderStatus.Data);
         }
     }
 }

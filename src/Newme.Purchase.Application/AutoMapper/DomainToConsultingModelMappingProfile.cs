@@ -13,6 +13,7 @@ namespace Newme.Purchase.Application.AutoMapper
             CreateMap<PurchaseItem, PurchaseItemConsultingModel>();
             CreateMap<Buyer, BuyerConsultingModel>();
             CreateMap<Address, AddressConsultingModel>();
+            CreateMap<Product, ProductConsultingModel>();
         }
     }
 }

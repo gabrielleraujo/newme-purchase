@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Newme.Purchase.Domain.Extensions
 {

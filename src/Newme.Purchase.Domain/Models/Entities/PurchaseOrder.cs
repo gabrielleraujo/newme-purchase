@@ -7,7 +7,6 @@ namespace Newme.Purchase.Domain.Models.Entities
 {
     public class PurchaseOrder : Entity
     {
-        public Buyer Buyer { get; private set; }
         public Guid BuyerId { get; private set; }
 
         public DateTime Date { get; private set; }
@@ -27,7 +26,6 @@ namespace Newme.Purchase.Domain.Models.Entities
         private PurchaseOrder() { }
         public PurchaseOrder(
             Guid id,
-            Buyer buyer, 
             Guid buyerId, 
             Address address, 
             DateTime date, 
@@ -37,7 +35,6 @@ namespace Newme.Purchase.Domain.Models.Entities
             double freightValue,
             IList<PurchaseItem> purchaseItems) : base(id)
         {
-            Buyer = buyer;
             BuyerId = buyerId;
             Address = address;
             Date = date;

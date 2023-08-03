@@ -27,7 +27,6 @@ namespace Newme.Purchase.Application.Queries.CalculateDiscount
         {
             var purchaseOrder = new PurchaseOrder(
                 id: Guid.NewGuid(),
-                buyer: _mapper.Map<Buyer>(request.Buyer),
                 buyerId: request.Buyer.Id,
                 address: _mapper.Map<Address>(request.Address),
                 date: DateTime.Now,

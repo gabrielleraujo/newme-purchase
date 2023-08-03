@@ -68,7 +68,7 @@ namespace Newme.Purchase.Infrastructure.Persistence.Configurations
                 .HasDefaultValue(EPurchaseOrderStatus.Initial);
 
 
-            builder.HasOne(x => x.Buyer);
+            //builder.HasOne(x => x.Buyer);
             builder.HasMany(x => x.PurchaseItems);
 
             //builder.Ignore(x => x.PurchaseItems);

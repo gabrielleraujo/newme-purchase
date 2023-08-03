@@ -9,7 +9,7 @@ using Newme.Purchase.Application.Events;
 using Newme.Purchase.Domain.Messaging;
 using Microsoft.Extensions.Logging;
 using Newme.Purchase.Domain.Models.Enums;
-using Newme.Purchase.Application.Subscribers.ReducedProductItemStockReceived.Sent;
+using Newmw.Purchase.Application.InputModels;
 
 namespace Newme.Purchase.Application.Commands.CreatePurchase
 {
@@ -50,7 +50,7 @@ namespace Newme.Purchase.Application.Commands.CreatePurchase
 
             var purchaseOrder = new PurchaseOrder(
                 id: command.PurchaseItems.FirstOrDefault()!.PurchaseId,
-                buyer: _mapper.Map<Buyer>(command.Buyer),
+                //buyer: _mapper.Map<Buyer>(command.Buyer),
                 buyerId: command.Buyer.Id,
                 address: _mapper.Map<Address>(command.Address),
                 date: DateTime.Now,
@@ -71,7 +71,10 @@ namespace Newme.Purchase.Application.Commands.CreatePurchase
 
             if (isCommitSuccess)
             {
-                await SendDomainEvent(purchaseOrder).ConfigureAwait(false);
+                await SendDomainEvent(
+                    purchaseOrder, 
+                    command.Buyer,
+                    command.PurchaseItems.Select(x => x.Product)).ConfigureAwait(false);
             }
 
             _logger.LogInformation($"{nameof(CreatePurchaseCommandHandler)} successfully completed");
@@ -82,20 +85,25 @@ namespace Newme.Purchase.Application.Commands.CreatePurchase
         private async Task RegisterPurchase(CreatePurchaseCommand command, PurchaseOrder purchaseOrder)
         {
             var buyer = await _repositoryCommand.FindByAsync<Buyer>(x => x.Id == purchaseOrder.BuyerId);
-            if (buyer == null) await _repositoryCommand.AddBuyerAsync(purchaseOrder.Buyer);
+            if (buyer == null) await _repositoryCommand.AddBuyerAsync(_mapper.Map<Buyer>(command.Buyer));
 
             var products = _mapper.Map<IList<Product>>(command.PurchaseItems.Select(x => x.Product).ToList());
-            var productsNotYetRegistered = _repositoryCommand.GetItemsNotFound<Product>(products);
-
-            await _repositoryCommand.AddRangeProductsAsync(productsNotYetRegistered);
+            var productsNotYetRegistered = await _repositoryCommand.GetItemsNotFound<Product>(products);
+            if (!productsNotYetRegistered.Any()) await _repositoryCommand.AddRangeProductsAsync(productsNotYetRegistered);
+                
             await _repositoryCommand.AddAsync(purchaseOrder);
         }
 
-        private async Task SendDomainEvent(PurchaseOrder purchaseOrder)
+        private async Task SendDomainEvent(
+            PurchaseOrder purchaseOrder, 
+            CreateBuyerInputModel buyer,
+            IEnumerable<InputProductInputModel> products)
         {
             var createdPurchaseOrderEvent = new CreatedPurchaseOrderEvent(
                 id: Guid.NewGuid(),
-                purchaseOrder: purchaseOrder);
+                purchaseOrder: purchaseOrder,
+                products: products,
+                buyer: buyer);
             await _mediator.Publish(createdPurchaseOrderEvent).ConfigureAwait(false);
         }
     }

@@ -26,6 +26,8 @@ namespace Newme.Purchase.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.Username)
                 .HasColumnName("Username");
+
+            builder.HasMany(x => x.Purchases);
         }
     }
 }

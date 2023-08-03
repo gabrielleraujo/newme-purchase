@@ -9,14 +9,12 @@ namespace Newme.Purchase.Domain.Models.Entities
         public Product(
             Guid id, 
             string name, 
-            double price, 
             string description, 
             Category category, 
             Color color, 
             Size size) : base(id)
         {
             Name = name;
-            Price = price;
             Description = description;
             Category = category;
             Color = color;
@@ -24,7 +22,6 @@ namespace Newme.Purchase.Domain.Models.Entities
         }
 
         public string Name { get; private set; }
-        public double Price { get; private set; }
         public string Description { get; private set; }
 
         public Category Category { get; private set; }

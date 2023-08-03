@@ -23,5 +23,7 @@ namespace Newme.Purchase.Domain.Models.Entities
 
         public string Username { get; private set; }
         public string Email { get; private set; }
+
+        public IList<PurchaseOrder> Purchases { get; private set; }
     }
 }

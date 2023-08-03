@@ -1,6 +1,8 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Newme.Purchase.Application.Services;
 using Newmw.Purchase.Application.InputModels;
+using Newmw.Purchase.Application.ViewModels;
 
 namespace Newme.Purchase.API.Controllers
 {
@@ -18,6 +20,7 @@ namespace Newme.Purchase.API.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> Add(CreatePurchaseInputModel purchaseInputModel)
         {
             var result = await _purchaseApplicationService.Register(purchaseInputModel);
@@ -25,6 +28,8 @@ namespace Newme.Purchase.API.Controllers
         }
         
         [HttpPost("discount")]
+        [ProducesResponseType(typeof(double), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CalculateDiscount(CreatePurchaseInputModel purchaseInputModel)
         {
             var result = await _purchaseApplicationService.CalculateDiscount(purchaseInputModel);
@@ -32,6 +37,8 @@ namespace Newme.Purchase.API.Controllers
         }
 
         [HttpGet("get-all/buyer/{buyerId:Guid}")]
+        [ProducesResponseType(typeof(IEnumerable<ReadPurchaseViewModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetAll(Guid buyerId)
         {
             var result = await _purchaseApplicationService.GetAll(buyerId);
@@ -39,6 +46,8 @@ namespace Newme.Purchase.API.Controllers
         }
 
         [HttpGet("{purchaseId:Guid}")]
+        [ProducesResponseType(typeof(ReadPurchaseViewModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetById(Guid purchaseId)
         {
             var result = await _purchaseApplicationService.GetById(purchaseId);

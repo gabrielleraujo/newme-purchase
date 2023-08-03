@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Newme.Purchase.Domain.Models.Abstracts;
 using Newme.Purchase.Domain.Models.Entities;
-using Newme.Purchase.Domain.Models.Enums;
 using Newme.Purchase.Domain.Repositories;
 
 namespace Newme.Purchase.Infrastructure.Persistence.Repositories
@@ -11,6 +9,11 @@ namespace Newme.Purchase.Infrastructure.Persistence.Repositories
         public PurchaseCommandRepository(PurchaseCommandContext dbContext) : base(dbContext)
         {
         }
+
+        public override async Task AddAsync(PurchaseOrder purchase)
+		{
+			await _dbSet.AddAsync(purchase);
+		}
 
         public async Task AddBuyerAsync(Buyer buyer)
         {

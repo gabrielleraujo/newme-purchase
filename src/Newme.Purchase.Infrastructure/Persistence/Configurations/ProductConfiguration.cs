@@ -22,9 +22,6 @@ namespace Newme.Purchase.Infrastructure.Persistence.Configurations
             builder.Property(x => x.Description)
                 .HasColumnName("Desciption");
 
-            builder.Property(x => x.Price)
-                .HasColumnName("Price");
-
             builder.Property(x => x.Category)
                 .HasColumnName("Category")
                 .HasConversion(

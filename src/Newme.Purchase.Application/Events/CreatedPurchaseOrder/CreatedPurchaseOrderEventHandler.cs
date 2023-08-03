@@ -28,6 +28,9 @@ namespace Newme.Purchase.Application.Events
                 notification.Id, nameof(CreatedPurchaseOrderEvent), DateTime.Now, notification.ToString());
 
             var consultingModel = _mapper.Map<PurchaseConsultingModel>(notification.PurchaseOrder);
+            consultingModel
+                .AddBuyer(notification.Buyer)
+                .AddPurchaseItemDetails(notification.Products);
 
             _logger.LogInformation("Event id: {id} start running eventual consistence at {date}, saved data on consulting db, data {data}.", 
                 notification.Id, DateTime.Now, consultingModel.ToString());

@@ -117,7 +117,7 @@ namespace Newme.Purchase.Application.Commands.ProcessPurchaseAfterCatalogVerifie
         private void SendExternalEventToMessageBus(PurchaseOrder purchaseOrder, double totalRefund)
         {
             var sentEvent = new PurchaseRefundAsExchangeVoucherSentEvent(
-                buyerId: purchaseOrder.Buyer.Id,
+                buyerId: purchaseOrder.BuyerId,
                 purchaseId: purchaseOrder.Id,
                 totalPrice: purchaseOrder.GetTotalRefund()
             );

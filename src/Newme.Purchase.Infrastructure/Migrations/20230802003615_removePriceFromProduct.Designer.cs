@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newme.Purchase.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Newme.Purchase.Infrastructure.Persistence;
 namespace Newme.Purchase.Infrastructure.Migrations
 {
     [DbContext(typeof(PurchaseCommandContext))]
-    partial class PurchaseCommandContextModelSnapshot : ModelSnapshot
+    [Migration("20230802003615_removePriceFromProduct")]
+    partial class removePriceFromProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -198,6 +201,32 @@ namespace Newme.Purchase.Infrastructure.Migrations
                     b.ToTable("PurchaseOrderItemStatus", (string)null);
 
                     b.UseTpcMappingStrategy();
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c070b697-8ea1-4ae3-98b0-a1e6d10b117b"),
+                            Description = "item de compra criado",
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = new Guid("648ee8d4-e16e-4b06-b20d-de77f13b29c9"),
+                            Description = "item de compra não aprovado porque o produto estava fora de estoque",
+                            Status = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("016793a3-dd06-4533-87a5-d5d44251b418"),
+                            Description = "item de compra parcialmente aprovado",
+                            Status = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("c7bee533-19e9-457e-9bab-bd1038ef486b"),
+                            Description = "item de compra aprovado",
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("Newme.Purchase.Infrastructure.Configurations.Utils.PurchaseOrderStatus", b =>
@@ -222,6 +251,50 @@ namespace Newme.Purchase.Infrastructure.Migrations
                     b.ToTable("PurchaseOrderStatus", (string)null);
 
                     b.UseTpcMappingStrategy();
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("ffc43c28-2a5d-471b-b70c-49d42fbf6d5d"),
+                            Description = "inicial",
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = new Guid("e016e397-0371-46cd-abf9-32c3862ff33e"),
+                            Description = "validação do pagamento",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("5be51086-a19c-4dab-9ec1-4dd2996cfe41"),
+                            Description = "pagamento autorizado",
+                            Status = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("0b779177-2467-48d9-980f-6f64cbe3b828"),
+                            Description = "pagamento não autorizado",
+                            Status = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("9377149a-77a4-4849-b4fd-14520e096737"),
+                            Description = "compra não aprovada porque o produto estava fora de estoque",
+                            Status = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("43e8604b-064d-47a0-a8d6-34148d6cf23b"),
+                            Description = "compra aprovada com itens faltantes",
+                            Status = 5
+                        },
+                        new
+                        {
+                            Id = new Guid("b159c09c-a785-4a8c-91be-f95b6bb0f6cf"),
+                            Description = "compra aprovada",
+                            Status = 6
+                        });
                 });
 
             modelBuilder.Entity("Newme.Purchase.Domain.Models.Entities.PurchaseItem", b =>
@@ -241,7 +314,7 @@ namespace Newme.Purchase.Infrastructure.Migrations
 
             modelBuilder.Entity("Newme.Purchase.Domain.Models.Entities.PurchaseOrder", b =>
                 {
-                    b.HasOne("Newme.Purchase.Domain.Models.Entities.Buyer", null)
+                    b.HasOne("Newme.Purchase.Domain.Models.Entities.Buyer", "Buyer")
                         .WithMany("Purchases")
                         .HasForeignKey("BuyerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -296,6 +369,8 @@ namespace Newme.Purchase.Infrastructure.Migrations
 
                     b.Navigation("Address")
                         .IsRequired();
+
+                    b.Navigation("Buyer");
                 });
 
             modelBuilder.Entity("Newme.Purchase.Domain.Models.Entities.Buyer", b =>

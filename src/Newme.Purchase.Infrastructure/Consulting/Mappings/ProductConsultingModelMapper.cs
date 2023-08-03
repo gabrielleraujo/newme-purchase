@@ -14,7 +14,6 @@ namespace Newme.Purchase.Infrastructure.Consulting.Mappings
                     classMap.AutoMap();
                     classMap.SetIgnoreExtraElements(true);
                     classMap.MapMember(p => p.Name).SetElementName("name");
-                    classMap.MapMember(p => p.Price).SetElementName("price");
                     classMap.MapMember(p => p.Description).SetElementName("description");
                     classMap.MapMember(p => p.Category).SetElementName("category");
                     classMap.MapMember(p => p.Color).SetElementName("color");

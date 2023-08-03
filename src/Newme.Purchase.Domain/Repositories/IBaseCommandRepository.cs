@@ -11,7 +11,7 @@ namespace Newme.Purchase.Domain.Repositories
 		#region consulting
 		Task<TModel> FindByAsync<TModel>(Func<TModel, bool> predicate) where TModel : class;
 		Task<List<TModel>> GetByAsync<TModel>(Func<TModel, bool> predicate) where TModel : class;
-		public IEnumerable<TEntity> GetItemsNotFound<TEntity>(IEnumerable<TEntity> items) where TEntity : Entity;
+		public Task<IEnumerable<TEntity>> GetItemsNotFound<TEntity>(IEnumerable<TEntity> items) where TEntity : Entity;
         public IEnumerable<Guid> GetIdsNotFound(IEnumerable<Guid> ids);
 		#endregion
 	}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newme.Purchase.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Newme.Purchase.Infrastructure.Persistence;
 namespace Newme.Purchase.Infrastructure.Migrations
 {
     [DbContext(typeof(PurchaseCommandContext))]
-    partial class PurchaseCommandContextModelSnapshot : ModelSnapshot
+    [Migration("20230803003511_removeBuyerFromPurchase")]
+    partial class removeBuyerFromPurchase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -15,21 +15,11 @@ namespace Newme.Purchase.Application.AutoMapper
             CreateMap<CreateAddressInputModel, Address>()
                 .ConstructUsing( x => new Address(x.ZipCode, x.Street, x.Number, x.Complement, x.Neighborhood, x.City, x.UF));
 
-            CreateMap<InputCategoryInputModel, Category>()
-                .ConstructUsing(x => new Category(x.Text));
-
-            CreateMap<InputColorInputModel, Color>()
-                .ConstructUsing(x => new Color(x.Text));
-
-            CreateMap<InputSizeInputModel, Size>()
-                .ConstructUsing(x => new Size(x.Text));
-
             CreateMap<InputProductInputModel, Product>()
-                .ConstructUsing(x => new Product(x.Id, x.Name, x.Price, x.Description,
-                        new Category(x.Category.Text),
-                        new Color(x.Color.Text),
-                        new Size(x.Size.Text)));
-
+                .ConstructUsing(x => new Product(x.Id, x.Name, x.Description,
+                        new Category(x.Category),
+                        new Color(x.Color),
+                        new Size(x.Size)));
 
             CreateMap<CreatePurchaseItemInputModel, PurchaseItem>()
                 .ConstructUsing(x => new PurchaseItem(
